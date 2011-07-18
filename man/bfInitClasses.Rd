@@ -5,7 +5,7 @@
 }
 \description{All betfair functions are capable of producing a valid S4 object
 corresponding to betfair SOAP specification. \cr For parsimony reasons the
-betfair S4 classes are not installed with the package. You need \code{
+betfair S4 classes are not installed with the package. You need to run \code{
 bfInitClasses()} to initialize them. Note that \code{XMLSchema} package is
 required for this initialization.}
 \value{\code{'\link[=bfSimpleOutput-class]{bfSimpleOutput}'} object, xml node or S4 object,  as specified by the \code{output} parameter}

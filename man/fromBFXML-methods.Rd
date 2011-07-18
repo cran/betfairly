@@ -1,38 +1,9 @@
 \name{fromBFXML-methods}
-\docType{methods}
-\alias{fromBFXML-methods}
-\alias{fromBFXML,ANY-method}
-\alias{fromBFXML,list-method}
-\alias{fromBFXML,missing-method}
-\alias{fromBFXML,vector-method}
-\title{ ~~ Methods for Function \code{fromBFXML}  ~~}
-\description{
- ~~ Methods for function \code{fromBFXML}  ~~
-}
-\section{Methods}{
-\describe{
-
-\item{\code{signature(obj = "ANY")}}{
-
-}
-
-\item{\code{signature(obj = "list")}}{
-%%  ~~describe this method here~~
-}
-
-\item{\code{signature(obj = "missing")}}{
-%%  ~~describe this method here~~
-}
-
-\item{\code{signature(obj = "vector")}}{
-%%  ~~describe this method here~~
-}
-}}
-\keyword{methods}
-\keyword{ ~~ other possible keyword(s) ~~ }
 \alias{fromBFXML-methods}
 \alias{fromBFXML}
-\details{\code{fromBFXML-methods}: The function \code{fromBFXML} is used internally to convert xml nodes
+\title{Convert an XML object into S4 object.}
+\description{Methods for function \code{fromBFXML}.}
+\details{The function \code{fromBFXML} is used internally to convert xml nodes
 resulted from betfair API requests into valid S4 objects as specified by
 betfair service WSDL description.  Methods are dispatched only for the
 second argument \code{obj}.
@@ -78,9 +49,7 @@ Target S4 class is taken from \code{'type'} argument,  or if missing is inferred
 \item{\code{signature(obj = "vector")}}{
 Like the \code{list} method but unlist it's argument,  to make it a vector.
 }
-}
-
-}
+}}
 \seealso{\code{'\link{betfairly-package}'} \code{'\link{bfInitClasses}'}}
 \references{https://docs.developer.betfair.com/betfair/}
 \author{Vitalie Spinu}
