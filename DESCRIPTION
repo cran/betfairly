@@ -1,20 +1,20 @@
 Package: betfairly
-Type: Package
-Title: Access Betfair API from R
-Version: 1.1
-Date: 2011-07-18
-Author: Vitalie Spinu <spinuvit@gmail.com>
 Maintainer: Vitalie Spinu <spinuvit@gmail.com>
-Description: An R interface to the Betfair API. The user can choose the
-        type of output to be XML, S4 (representing native Betfair SOAP
-        types), nested list or simplified R objects ready to be used in
-        the statistical analysis.
 License: GPL (>= 2)
+Title: Access Betfair API from R
+Type: Package
 LazyLoad: yes
+Author: Vitalie Spinu <spinuvit@gmail.com>
+Description: An R interface to the Betfair API. The user can choose the
+    type of output to be XML, S4 (representing native Betfair SOAP
+    types), nested list or simplified R objects ready to be used in the
+    statistical analysis.
+Version: 1.2
 URL: http://code.google.com/p/betfairly/
+Date: 2011-11-27
 Depends: R (>= 2.10), methods, RCurl, XML
 Suggests: XMLSchema
 Collate: 'betfair.R' 'classes.R' 'funcs.R'
-Packaged: 2011-09-12 16:53:00 UTC; vitoshka
+Packaged: 2011-11-28 21:40:51 UTC; vitoshka
 Repository: CRAN
-Date/Publication: 2011-09-12 19:05:57
+Date/Publication: 2011-11-29 06:57:30

@@ -21,9 +21,10 @@ isXMLStructure <- function(x){
 
 bfSplit <- function(x, split = "~"){
     tsub <- "@!@"
-    x <- gsub(paste("\\", split, sep = ""), tsub, x, fixed = T)
-    x <- unlist(strsplit(x, split, fixed = T))
-    gsub(tsub, paste("\\", split, sep = ""), x, fixed = T)
+    torepl <- paste("\\", split, sep = "")
+    x <- gsub(torepl, tsub, x, fixed = T)
+    x <- strsplit(x, split, fixed = T)[[1L]]
+    gsub(tsub, torepl, x, fixed = T)
 }
 
 isHTTPError <- function(response){
@@ -251,18 +252,10 @@ returnBFOutput <- function(res, output, simplifun = .simplifunDefault, ...){
 ##' @return time string in appropriate format
 ##' @references http://www.w3.org/TR/xmlschema-2/#dateTime
 ##' @author Vitalie Spinu (\email{spinuvit@@gmail.com})
-asBFDateTime <- function(x, tz = "Z")
+asBFDateTime <- function(x, tz = "Z"){
     ## tz should be in format (('+' | '-') hh ':' mm) no checks
     paste(format(as.POSIXlt(x), "%FT%H:%M:%OS3"), tz, sep = "")
-
-## asBFDate <- function(x, tz = "Z"){
-##     ## tz should be in format (('+' | '-') hh ':' mm) no checks
-##     paste(format(as.POSIXlt(x), "%FT00:00:00"), tz, sep = "")
-## }
-
-##     as.POSIXct("1999-12-05 23:02:12")
-## format(as.POSIXct("1999-12-05 23:02:12"), "%FT%T%zz")
-## format(Sys.time(), "%FT%T")
+}
 
 toBFPOSIX <- function(from) as.POSIXct(as.integer(substr(from, 1, 10)), origin="1970-01-01", tz="GMT")
 toBFArray <- function(array, type, maxlength = NULL){
@@ -488,7 +481,7 @@ eval({
         for(nm in names(runners)[.runners_types != "character"])
             runners[[nm]] <- as(runners[[nm]], .runners_types[[nm]])
     }else{
-        runners <- NULL
+        runners <- data.frame()
     }
     if(length(toBack) || length(toLay)){
         prices <- as.data.frame(do.call(rbind, c(toBack, toLay)), stringsAsFactors = FALSE)
@@ -496,10 +489,64 @@ eval({
             prices[[nm]] <- as(prices[[nm]], .prices_types[[nm]])
         prices <- prices[-5L]  ## type is not needed
     }else{
-        prices <- NULL
+        prices <- data.frame()
     }
     list( runners = runners,
         prices = prices)
+}
+
+.simple_getCompleteMarketPricesCompresed <- function(res, ...){
+    res <- xmlValue(res[["completeMarketPrices"]])
+    if(!nzchar(res)) return(NULL) ##equivalent to list()
+    res <- bfSplit(res, ":")
+    out <- list()
+    out[c("marketID", "inPlayDelay")] <- as.integer(strsplit(res[[1L]], "~", TRUE)[[1L]])
+    removedRunners <-
+        if(regexpr(res[[2]], ";", fixed = TRUE)>0L){
+            resRR <- bfSplit(res[[3]], ";")[[1L]][[-1L]] ## not clear first is ""? fixme:
+            resRR <- strsplit(resRR, ",", fixed = TRUE)
+            resRR <- do.call(rbind, resRR)
+            colnames(resRR) <- c("selectionName", "removedTime", "reductionFactor")
+            res <- res[c(-1L, -2L)]
+            as.data.frame(resRR)
+        }else{
+            res <- res[-1L]
+            data.frame()
+        }
+    res <- strsplit(res, "|", fixed = TRUE)
+    prices <- vector("list", length(res))
+    runners <- vector("character", length(res))
+    for(i in 1:length(res)){
+        runners[[i]] <-  res[[i]][[1L]]
+        if(length(res[[i]]) == 1L){ ## missing prices (happens)
+            prices[i] <- list(NULL)
+        }else{
+            prices[[i]] <- cbind(i, matrix(unlist(strsplit(res[[i]][[2]], "~"), use.names = FALSE), ncol = 5L, byrow = TRUE), deparse.level = 0L)
+        }
+    }
+    runners <- strsplit(runners, "~", fixed = TRUE)
+    runners <- do.call(rbind, runners)
+    runners <- cbind(1:nrow(runners), runners)
+    runners <- as.data.frame(runners, stringsAsFactors = FALSE)
+    names(runners) <- c("runner", "selectionId", "orderIndex", "totalAmountMatched", "lastPriceMatched", "handicap", "reductionFactor", "vacant", "asianLineId", "farSPPrice", "nearSPPrice", "actualSPPrice")
+    for(i in c(1L, 2L, 3L, 9L))
+        runners[[i]] <- as.integer(runners[[i]])
+    for(i in (1:10)[-c(1L, 2L, 3L, 8L, 9L)])
+        runners[[i]] <- as.numeric(runners[[i]])
+    runners[[8L]] <- as.logical(runners[[8L]])
+    prices <- do.call(rbind, prices)
+    if(is.null(prices))
+        prices <- data.frame()
+    else{
+        prices <- as.data.frame(prices, stringsAsFactors = FALSE)
+        names(prices) <- c("runner", "price", "backAmountAvailable", "layAmountAvailable", "totalBSPBackAvailable", "totalBSPLayAvailable")
+        for(i in 2:length(prices))
+            prices[[i]] <- as.numeric(prices[[i]])
+        prices[[1L]] <- as.integer(prices[[1L]])
+    }
+    list(out, removedRunners = removedRunners,
+         runners = runners,
+         prices = prices)
 }
 
 ## getMarketPricesCompressed(nm)
@@ -519,7 +566,6 @@ eval({
         if(length(sl <- sl[-1])) # otherwise null
             volumes[[i]] <- cbind(runner = i, matrix(unlist(strsplit(unlist(sl), "~", fixed = TRUE)), ncol = 2, byrow = T, dimnames = list(NULL, c("Odds", "totalMatchedAmount"))))
     }
-
     runners <- data.frame(seq_along(res), do.call(rbind, runners), stringsAsFactors = F)
     names(runners) <- c("runner", "selectionId", "asianLineId", "actualBSP", "totalBspBackMatchedAmount", "totalBspLiabilityMatchedAmount")
     for(nm in c("runner", "asianLineId", "selectionId"))

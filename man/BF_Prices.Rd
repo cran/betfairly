@@ -25,8 +25,10 @@ returns it in a ~ (tilde) delimited String.
 }
 \alias{>BF_Prices}
 \alias{getCompleteMarketPricesCompressed}
-\value{\code{getCompleteMarketPricesCompressed}: a character of length 1 representing the compressed output (simple
-output is not implemented yet todo::)
+\value{\code{getCompleteMarketPricesCompressed}: A list of class \code{GetCompleteMarketPricesCompressedRespSimple}
+with three additional slots containing data.frames \code{removedRunners},
+\code{runners} and \code{prices}. Use \code{\link{merge}} for joining these
+by the common field \code{runners}.
 
 \code{getMarketPrices}: Object of class \code{"GetMarketPricesRespSimple"} with a slot
 \code{runnerPrices} containing a data frame of back and lay prices for each

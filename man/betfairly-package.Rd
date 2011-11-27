@@ -61,7 +61,14 @@ what you will need \code{XMLSchema} package for the S4 conversion to work,
 as it defines some  classes which are not provided with \code{betfairly}
 package. See \code{\link{bfInitClasses}} for further instructions. }
 
-}}
+}
+
+You can change the default by setting the \code{bfOutput} option:
+
+\code{options(bfOutput = "XML")}
+
+}
+
 
 \section{Betfair exchange servers}{ Functions to betfair exchange services
 accept a \code{server} parameter, which can be either "GB" (the default)
